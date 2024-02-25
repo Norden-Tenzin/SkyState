@@ -11,25 +11,31 @@ struct SearchBar: View {
     @Binding var text: String
     @State private var isEditing = false
     @FocusState var isBarFocused: Bool
+    let prompt: String
+    let padding: Double
 
     var body: some View {
-        HStack {
-            TextField("Search", text: $text)
-                .focused($isBarFocused)
-                .padding(7)
-                .padding(.horizontal, 25)
-                .background(Color(.systemGray6))
-                .cornerRadius(8)
-                .overlay(
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading, 8)
+        HStack(spacing: 0) {
+            HStack(spacing: padding / 2) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+                TextField("Search", text: $text)
+                    .focused($isBarFocused)
+                    .padding(.vertical, 5)
+                if text != "" {
+                    Button(action: {
+                        text = ""
+                    }, label: {
+                            Image(systemName: "x.circle.fill")
+                                .foregroundColor(.gray)
+                        })
                 }
-            )
-                .padding(.leading, self.isEditing ? 20 : 20)
-                .padding(.trailing, self.isEditing ? 10 : 20)
+            }
+                .padding(.horizontal, padding / 2)
+                .background(content: {
+                Color(.systemGray6)
+            })
+                .padding(.horizontal, padding)
                 .onTapGesture {
                 withAnimation {
                     self.isEditing = true
@@ -44,7 +50,7 @@ struct SearchBar: View {
                 }) {
                     Text("Cancel")
                 }
-                .padding(.trailing, self.isEditing ? 20 : 0)
+                    .padding(.trailing, self.isEditing ? padding : 0)
                     .transition(.move(edge: .trailing))
             }
         }

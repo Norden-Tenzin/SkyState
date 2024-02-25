@@ -7,61 +7,40 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    @State private var searchText = ""
-    @State private var cvm = CityViewModel.instance
-
-    var body: some View {
-        VStack {
-            SearchBar(text: $searchText)
-                .onChange(of: searchText) { oldValue, newValue in
-                if newValue != "" {
-                    cvm.searchCity(text: newValue)
-                } else {
-                    cvm.currentCity = nil
-                }
-            }
-            if cvm.currentCity != nil {
-                Text(cvm.currentCity?.id.uuidString ?? "")
-                Text(cvm.currentCity?.name ?? "")
-                Text(cvm.currentCity?.region?.description ?? "")
-                Text(cvm.currentCity?.coordinates.debugDescription ?? "")
-            }
-            Spacer()
-        }
-    }
+enum TabType {
+    case search
+    case weather
+    case settings
 }
 
-struct ContentView1: View {
-    @State var viewModel = WeatherViewModel()
+struct ContentView: View {
+    @Environment(PermissionViewModel.self) var permissionViewModel
+
     var body: some View {
-        switch viewModel.authorizationStatus {
+        switch permissionViewModel.authorizationStatus {
         case .notDetermined:
-            RequestLocationView(viewModel: viewModel)
+            RequestLocationView()
         case .restricted:
             Color.black
                 .overlay(content: { Text("RESTRICTED").foregroundStyle(Color.white) })
         case .denied:
-            RequestLocationView(viewModel: viewModel)
+            RequestLocationView()
         case .authorizedAlways:
-            WeatherView(viewModel: viewModel)
+            JunctionView()
         case .authorizedWhenInUse:
-            WeatherView(viewModel: viewModel)
+            JunctionView()
         case .authorized:
-            WeatherView(viewModel: viewModel)
+            JunctionView()
         @unknown default:
-            WeatherView(viewModel: viewModel)
+            JunctionView()
         }
     }
 }
 
-#Preview {
-    ContentView()
-}
-
 struct RequestLocationView: View {
+    @Environment(PermissionViewModel.self) var permissionViewModel
     @State var locationAccessAlert: Bool = false
-    var viewModel: WeatherViewModel
+
     var body: some View {
         VStack(alignment: .center, spacing: 30, content: {
             Spacer()
@@ -74,8 +53,8 @@ struct RequestLocationView: View {
                 .multilineTextAlignment(.center)
                 .font(.system(size: 20, weight: .semibold))
             Button(action: {
-                if viewModel.authorizationStatus == .notDetermined {
-                    viewModel.requestPermission()
+                if permissionViewModel.authorizationStatus == .notDetermined {
+                    permissionViewModel.requestPermission()
                 } else {
                     locationAccessAlert = true
                 }
@@ -97,4 +76,43 @@ struct RequestLocationView: View {
             }
         })
     }
+}
+
+struct JunctionView: View {
+    @State var selection: TabType = .search
+    @State var currentCity: City?
+    @State var cvm = CityViewModel.instance
+
+    var body: some View {
+        NavigationStack {
+            TabView(selection: $selection,
+                content: {
+                    CitySearchView(cvm: $cvm, currentCity: $currentCity)
+                        .tag(TabType.search)
+                    if !cvm.cities.isEmpty {
+                        WeatherView(currentCity: $currentCity)
+                            .tag(TabType.weather)
+                    }
+                    SettingsView()
+                        .tag(TabType.settings)
+                })
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                .indexViewStyle(.page(backgroundDisplayMode: .always))
+                .ignoresSafeArea()
+        }
+            .onAppear() {
+            if cvm.cities.isEmpty {
+                selection = .search
+            } else {
+                selection = .weather
+            }
+        }
+    }
+}
+
+#Preview() {
+    @State var permissionViewModel: PermissionViewModel = PermissionViewModel()
+
+    return ContentView()
+        .environment(permissionViewModel)
 }

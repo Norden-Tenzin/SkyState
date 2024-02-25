@@ -11,10 +11,8 @@ import CoreLocation
 import WeatherKit
 
 @Observable
-class WeatherViewModel: NSObject, CLLocationManagerDelegate {
+class PermissionViewModel: NSObject, CLLocationManagerDelegate {
     var authorizationStatus: CLAuthorizationStatus
-    var lastSeenLocation: CLLocation?
-    var currentPlacemark: CLPlacemark?
 
     private let locationManager: CLLocationManager
 
@@ -36,6 +34,12 @@ class WeatherViewModel: NSObject, CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
     }
+}
+
+@Observable
+class WeatherViewModel {
+    var lastSeenLocation: CLLocation?
+    var currentPlacemark: CLPlacemark?
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         lastSeenLocation = locations.first

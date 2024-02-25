@@ -9,10 +9,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
-    @Binding var units: Units
+    @AppStorage("units") var units: Units = .american
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Settings")
+                .font(.title)
+                .fontWeight(.bold)
             HStack {
                 Text("Units")
                     .font(.system(size: 20, weight: .bold))
@@ -30,30 +33,34 @@ struct SettingsView: View {
                     .frame(width: 150, height: 100)
             }
             Spacer()
-            Text("Like what i do?")
-                .padding(.top, 20)
-            Text("Say hi 👋") + Text("[@norden](https://twitter.com/nordten)")
+            HStack {
+                Spacer()
+                VStack(alignment: .center) {
+                    Text("Like what i do?")
+                        .padding(.top, 20)
+                    Text("Say hi 👋") + Text("[@norden](https://twitter.com/nordten)")
+                }
+                Spacer()
+            }
+            Spacer()
             Spacer()
         }
+            .padding(.top, 45)
             .padding(.horizontal, 20)
-            .navigationBarBackButtonHidden()
-            .toolbar(content: {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: { dismiss() }, label: {
-                        Image(systemName: "chevron.backward")
-                            .padding(.top, 10)
-                            .font(.system(size: 20))
-                    })
-                    .buttonStyle(.plain)
-            }
-            ToolbarItem(placement: .principal) {
-                Text("Settings")
-                    .font(.system(size: 20, weight: .bold))
-            }
-        })
+//            .navigationBarBackButtonHidden()
+//            .toolbar(content: {
+//            ToolbarItem(placement: .topBarLeading) {
+//                Button(action: { dismiss() }, label: {
+//                        Image(systemName: "chevron.backward")
+//                            .padding(.top, 10)
+//                            .font(.system(size: 20))
+//                    })
+//                    .buttonStyle(.plain)
+//            }
+//            ToolbarItem(placement: .principal) {
+//                Text("Settings")
+//                    .font(.system(size: 20, weight: .bold))
+//            }
+//        })
     }
-}
-
-#Preview {
-    SettingsView(units: .constant(Units.american))
 }
