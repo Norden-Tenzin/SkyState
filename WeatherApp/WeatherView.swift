@@ -5,10 +5,10 @@
 //  Created by Tenzin Norden on 10/18/23.
 //
 
-import SwiftUI
-import SwiftData
-import WeatherKit
 import CoreLocation
+import SwiftData
+import SwiftUI
+import WeatherKit
 
 public enum Units: String {
     case american
@@ -63,8 +63,8 @@ struct WeatherView: View {
                         Text(getWindSpeed(weather?.currentWeather.wind.speed.value))
                             .font(.system(size: 15))
                     }
-                        .foregroundStyle(.clear)
-                        .padding(.bottom, 50)
+                    .foregroundStyle(.clear)
+                    .padding(.bottom, 50)
                     VStack {
                         Color.clear
                             .frame(height: 30)
@@ -75,35 +75,34 @@ struct WeatherView: View {
                         Color.clear
                             .frame(height: 30)
                     }
-                        .padding(30)
+                    .padding(30)
                 } else {
-                    //                            NavigationLink {
-                    //                                SettingsView(units: $units)
-                    //                            } label: {
-                    //                                Image(systemName: "gear")
-                    //                                    .padding(.trailing, 20)
-                    //                                    .padding(.top, 10)
-                    //                                    .font(.system(size: 25))
-                    //
-                    //                            }
-                    //                                .buttonStyle(.plain)
-
-                    Text(currentCity?.name ?? "")
-                        .font(.system(size: 20, weight: .bold))
-                        .lineLimit(1)
-                    Text("\(city ?? "City"), \(country ?? "Country")")
-//                        .font(.system(size: 20))
-                    Text("Now")
-                        .padding(.bottom, geo.size.height * 0.1)
+                    VStack(spacing: 0) {
+                        Text(currentCity?.name ?? "")
+                            .font(.system(size: 20, weight: .bold))
+                            .lineLimit(1)
+                            .fontDesign(.monospaced)
+                        if city != "City", country != "Country" {
+                            Text("\(city ?? "City"), \(country ?? "Country")")
+                                .fontDesign(.monospaced)
+                        }
+                        Text("Now")
+                            .padding(.bottom, geo.size.height * 0.1)
+                            .fontDesign(.monospaced)
+                    }
                     Image(systemName: weather?.currentWeather.symbolName ?? "sun.max")
                         .font(.system(size: 70))
                     Text(getTemp(weather?.currentWeather.temperature.value))
                         .font(.system(size: 60, weight: .bold))
+                        .fontDesign(.monospaced)
                         .padding(.bottom, geo.size.height * 0.05)
-                    Text(String(weather?.currentWeather.condition.description ?? ""))
-                        .font(.system(size: 20, weight: .bold))
+                    Text(String(weather?.currentWeather.condition.description.uppercased() ?? ""))
+                        .font(.system(size: 20, weight: .black))
                         .padding(.bottom, geo.size.height * 0.04)
+                        .fontDesign(.default)
+                        .fontWidth(.expanded)
                     Text("Wind")
+                        .fontDesign(.monospaced)
                     HStack {
                         Image(systemName: "wind")
                             .font(.system(size: 20, weight: .bold))
@@ -113,9 +112,10 @@ struct WeatherView: View {
                             .rotationEffect(Angle(degrees: weather?.currentWeather.wind.direction.value ?? 0))
                         Text(weather?.currentWeather.wind.compassDirection.abbreviation ?? "")
                     }
-                        .padding(.bottom, 40)
+                    .padding(.bottom, 40)
+                    .fontDesign(.monospaced)
                     Grid(alignment: .topLeading,
-                        verticalSpacing: 5) {
+                         verticalSpacing: 5) {
                         ForEach(week, id: \.date) { day in
                             GridRow {
                                 Text(getWeekDay(date: day.date))
@@ -126,17 +126,23 @@ struct WeatherView: View {
                                 Text(getTemp(day.highTemperature.value))
                                 Text(getTemp(day.lowTemperature.value))
                             }
-                                .frame(height: 30)
+                            .frame(height: 30)
                         }
                     }
-                        .padding(30)
+                    .padding(30)
+                    .fontDesign(.monospaced)
                 }
             }
-                .padding(.top, 45)
-                .scrollIndicators(.hidden)
-                .task {
+            .padding(.top, 45)
+            .scrollIndicators(.hidden)
+            .task {
                 currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
                 load()
+            }
+            .onAppear {
+                if currentCity == nil {
+                    // go back to search
+                }
             }
         }
     }
@@ -173,7 +179,7 @@ struct WeatherView: View {
                 city = CountryCity["city"] ?? "City"
                 weather = await fetchWeather(latitude: lat, longitude: lng)
                 let dailyForecast = weather?.dailyForecast
-                for index in 0..<min(dailyForecast?.count ?? 0, 5) {
+                for index in 0 ..< min(dailyForecast?.count ?? 0, 5) {
                     if let forecast = dailyForecast? [index] {
                         week.append(forecast)
                     }
@@ -218,7 +224,7 @@ func getWeekDay(date: Date) -> String {
 
 func openAppSettings() {
     if let bundleId = Bundle.main.bundleIdentifier,
-        let url = URL(string: "\(UIApplication.openSettingsURLString)&root=Privacy&path=LOCATION/\(bundleId)") {
+       let url = URL(string: "\(UIApplication.openSettingsURLString)&root=Privacy&path=LOCATION/\(bundleId)") {
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 
@@ -236,8 +242,9 @@ func openAppSettings() {
 //    URL(string: Loca)!
 //    UIApplication.shared.open(url)
 }
+
 //
-//#Preview {
+// #Preview {
 //    @State var viewModel: WeatherViewModel = .init()
 //    //    @AppStorage var userSettings = UserSettings()
 //
@@ -254,4 +261,4 @@ func openAppSettings() {
 //    @State var week: [DayWeather] = []
 //
 //    WeatherView(viewModel: viewModel, units: units, loaded: loaded, weather: weather, latitude: latitude, longitude: longitude, country: country, city: city, week: week)
-//}
+// }

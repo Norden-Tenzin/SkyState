@@ -15,7 +15,6 @@ enum TabType {
 
 struct ContentView: View {
     @Environment(PermissionViewModel.self) var permissionViewModel
-
     var body: some View {
         switch permissionViewModel.authorizationStatus {
         case .notDetermined:
@@ -32,7 +31,7 @@ struct ContentView: View {
         case .authorized:
             JunctionView()
         @unknown default:
-            JunctionView()
+            RequestLocationView()
         }
     }
 }
@@ -58,18 +57,18 @@ struct RequestLocationView: View {
                 } else {
                     locationAccessAlert = true
                 }
-//                viewModel.requestPermission()
+                //                viewModel.requestPermission()
             }, label: {
-                    Label("Allow tracking", systemImage: "location.fill")
-                })
-                .padding(10)
-                .foregroundColor(.white)
-                .background(Color.blue)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                Label("Allow tracking", systemImage: "location.fill")
+            })
+            .padding(10)
+            .foregroundColor(.white)
+            .background(Color.blue)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             Spacer()
             Spacer()
         })
-            .alert("Access to your location is essential for us to provide you with accurate weather information", isPresented: $locationAccessAlert, actions: {
+        .alert("Access to your location is essential for us to provide you with accurate weather information", isPresented: $locationAccessAlert, actions: {
             Button("Settings", role: .cancel) {
                 locationAccessAlert = false
                 openAppSettings()
@@ -79,28 +78,77 @@ struct RequestLocationView: View {
 }
 
 struct JunctionView: View {
+    @Environment(PermissionViewModel.self) var permissionViewModel
     @State var selection: TabType = .search
     @State var currentCity: City?
     @State var cvm = CityViewModel.instance
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $selection,
-                content: {
-                    CitySearchView(cvm: $cvm, currentCity: $currentCity)
-                        .tag(TabType.search)
-                    if !cvm.cities.isEmpty {
-                        WeatherView(currentCity: $currentCity)
-                            .tag(TabType.weather)
+            ZStack {
+                TabView(selection: $selection,
+                        content: {
+                            CitySearchView(cvm: $cvm, currentCity: $currentCity)
+                                .tag(TabType.search)
+                            if !cvm.cities.isEmpty {
+                                WeatherView(currentCity: $currentCity)
+                                    .tag(TabType.weather)
+                            }
+                            SettingsView()
+                                .tag(TabType.settings)
+                        })
+                        .tabViewStyle(.page)
+                        .ignoresSafeArea()
+                VStack {
+                    Spacer()
+                    HStack {
+                        Circle()
+                            .fill(selection == .search ? Color(.systemGray5) : Color(.systemGray2))
+                            .frame(height: 8)
+                        if !cvm.cities.isEmpty {
+                            Circle()
+                                .fill(selection == .weather ? Color(.systemGray5) : Color(.systemGray2))
+                                .frame(height: 8)
+                        }
+                        Circle()
+                            .fill(selection == .settings ? Color(.systemGray5) : Color(.systemGray2))
+                            .frame(height: 8)
                     }
-                    SettingsView()
-                        .tag(TabType.settings)
-                })
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
-                .ignoresSafeArea()
+                }
+            }
         }
-            .onAppear() {
+        .onAppear {
+            if permissionViewModel.authorizationStatus == .authorizedAlways || permissionViewModel.authorizationStatus == .authorizedWhenInUse {
+                let newCity = City()
+                do {
+                    try cvm.loadCities()
+                } catch {
+                    print(error.localizedDescription)
+                }
+                if !cvm.cities.contains(where: { cc in
+                    cc.name == "My Location"
+                }) {
+                    cvm.cities = [newCity] + cvm.cities
+                }
+                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
+                if currentCity != nil {
+                    currentCity = newCity
+                }
+            } else {
+                do {
+                    try cvm.loadCities()
+                } catch {
+                    print(error.localizedDescription)
+                }
+                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
+            }
+            if currentCity == nil {
+                if cvm.cities.count > 0 {
+                    currentCity = cvm.cities.first
+                } else {
+                    UserDefaults.standard.setCodableObject(cvm.cities.first, forKey: "city")
+                }
+            }
             if cvm.cities.isEmpty {
                 selection = .search
             } else {
@@ -113,6 +161,6 @@ struct JunctionView: View {
 #Preview() {
     @State var permissionViewModel: PermissionViewModel = PermissionViewModel()
 
-    return ContentView()
+    return JunctionView()
         .environment(permissionViewModel)
 }

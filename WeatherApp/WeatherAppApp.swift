@@ -16,7 +16,7 @@ struct WeatherAppApp: App {
         WindowGroup {
             NavigationStack {
 //                WeatherView()
-                ContentView()
+                JunctionView()
                     .environment(permissionViewModel)
             }
         }

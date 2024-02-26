@@ -47,20 +47,6 @@ struct SettingsView: View {
         }
             .padding(.top, 45)
             .padding(.horizontal, 20)
-//            .navigationBarBackButtonHidden()
-//            .toolbar(content: {
-//            ToolbarItem(placement: .topBarLeading) {
-//                Button(action: { dismiss() }, label: {
-//                        Image(systemName: "chevron.backward")
-//                            .padding(.top, 10)
-//                            .font(.system(size: 20))
-//                    })
-//                    .buttonStyle(.plain)
-//            }
-//            ToolbarItem(placement: .principal) {
-//                Text("Settings")
-//                    .font(.system(size: 20, weight: .bold))
-//            }
-//        })
+            .fontDesign(.monospaced)
     }
 }
