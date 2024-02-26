@@ -32,77 +32,49 @@ struct WeatherView: View {
     @Binding var currentCity: City?
 
     var body: some View {
-        GeometryReader { geo in
-            VStack {
-                if loaded == false {
+        GeometryReader { _ in
+            VStack(spacing: 0) {
+                VStack(spacing: 0) {
                     Text(currentCity?.name ?? "")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.clear)
-                    Text("\(city ?? "City"), \(country ?? "Country")")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.clear)
+                        .lineLimit(1)
+                        .fontDesign(.monospaced)
+                        .redacted(reason: !loaded ? .placeholder : [])
+                    if city != "City", country != "Country" {
+                        Text("\(city ?? "City"), \(country ?? "Country")")
+                            .fontDesign(.monospaced)
+                            .redacted(reason: !loaded ? .placeholder : [])
+                    }
                     Text("Now")
-                        .foregroundStyle(.clear)
-                        .padding(.bottom, 100)
-                    Image(systemName: weather?.currentWeather.symbolName ?? "sun.max")
+                        .fontDesign(.monospaced)
+                        .redacted(reason: !loaded ? .placeholder : [])
+                }
+                Spacer()
+                VStack(spacing: 0) {
+                    Image(systemName: weather?.currentWeather.symbolName ?? "cloud.fill")
+                        .foregroundStyle(loaded ? Color.black : Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
                         .font(.system(size: 70))
-                        .foregroundStyle(.clear)
-                    Text("_ _")
-                        .font(.system(size: 60, weight: .regular))
-                        .padding(.bottom, 50)
-                    Text(String(weather?.currentWeather.condition.description ?? ""))
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(.clear)
-                        .padding(.bottom, 50)
-                    Text("Wind")
-                        .foregroundStyle(.clear)
-                    HStack {
-                        Image(systemName: "wind")
-                            .font(.system(size: 20, weight: .bold))
-                        Text(getWindSpeed(weather?.currentWeather.wind.speed.value))
-                            .font(.system(size: 15))
-                    }
-                    .foregroundStyle(.clear)
-                    .padding(.bottom, 50)
-                    VStack {
-                        Color.clear
-                            .frame(height: 30)
-                        Color.clear
-                            .frame(height: 30)
-                        Color.clear
-                            .frame(height: 30)
-                        Color.clear
-                            .frame(height: 30)
-                    }
-                    .padding(30)
-                } else {
-                    VStack(spacing: 0) {
-                        Text(currentCity?.name ?? "")
-                            .font(.system(size: 20, weight: .bold))
-                            .lineLimit(1)
+                    if loaded {
+                        Text(getTemp(weather?.currentWeather.temperature.value))
+                            .font(.system(size: 60, weight: .bold))
                             .fontDesign(.monospaced)
-                        if city != "City", country != "Country" {
-                            Text("\(city ?? "City"), \(country ?? "Country")")
-                                .fontDesign(.monospaced)
-                        }
-                        Text("Now")
-                            .padding(.bottom, geo.size.height * 0.05)
+                    } else {
+                        Text("__")
+                            .font(.system(size: 60))
                             .fontDesign(.monospaced)
                     }
-                    Image(systemName: weather?.currentWeather.symbolName ?? "sun.max")
-                        .font(.system(size: 70))
-                    Text(getTemp(weather?.currentWeather.temperature.value))
-                        .font(.system(size: 60, weight: .bold))
-                        .fontDesign(.monospaced)
-                        .padding(.bottom, geo.size.height * 0.05)
-                    Text(String(weather?.currentWeather.condition.description.uppercased() ?? ""))
-                        .font(.system(size: 20, weight: .black))
-                        .padding(.bottom, geo.size.height * 0.04)
-                        .fontDesign(.default)
-                        .fontWidth(.expanded)
+                }
+                Spacer()
+                Text(String(weather?.currentWeather.condition.description.uppercased() ?? "PARTLY CLOUDY"))
+                    .font(.system(size: 20, weight: .black))
+                    .fontDesign(.default)
+                    .fontWidth(.expanded)
+                    .redacted(reason: !loaded ? .placeholder : [])
+                Spacer()
+                VStack(spacing: 0) {
                     Text("Wind")
                         .fontDesign(.monospaced)
+                        .redacted(reason: !loaded ? .placeholder : [])
                     HStack {
                         Image(systemName: "wind")
                             .font(.system(size: 20, weight: .bold))
@@ -112,8 +84,18 @@ struct WeatherView: View {
                             .rotationEffect(Angle(degrees: weather?.currentWeather.wind.direction.value ?? 0))
                         Text(weather?.currentWeather.wind.compassDirection.abbreviation ?? "")
                     }
-                    .padding(.bottom, geo.size.height * 0.025)
-                    .fontDesign(.monospaced)
+                    .foregroundStyle(loaded ? Color.black : Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
+                    .overlay {
+                        if loaded {
+                        } else {
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
+                        }
+                    }
+                }
+                .fontDesign(.monospaced)
+                Spacer()
+                if loaded {
                     Grid(alignment: .topLeading,
                          verticalSpacing: 5) {
                         ForEach(week, id: \.date) { day in
@@ -129,12 +111,16 @@ struct WeatherView: View {
                             .frame(height: 30)
                         }
                     }
-                         .padding(.horizontal, 20)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 50)
                     .fontDesign(.monospaced)
+                } else {
+                    Color.clear
+                        .frame(height: 170)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 50)
                 }
             }
-            //.padding(.top, 45)
-            .padding(.top, geo.size.height * 0.03125)
             .scrollIndicators(.hidden)
             .task {
                 load()

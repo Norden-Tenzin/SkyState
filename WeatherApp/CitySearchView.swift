@@ -148,37 +148,6 @@ struct CitySearchView: View {
                 }
             }
         }
-        .padding(.top, 45)
-//            .onAppear() {
-//            if permissionViewModel.authorizationStatus == .authorizedAlways || permissionViewModel.authorizationStatus == .authorizedWhenInUse {
-//                let newCity = City()
-//                do {
-//                    try cvm.loadCities()
-//                } catch {
-//                    print(error.localizedDescription)
-//                }
-//                if !cvm.cities.contains(where: { cc in
-//                    cc.name == "My Location"
-//                }) {
-//                    cvm.cities = [newCity] + cvm.cities
-//                }
-//                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
-//                if currentCity != nil {
-//                    currentCity = newCity
-//                }
-//            } else {
-//                do {
-//                    try cvm.loadCities()
-//                } catch {
-//                    print(error.localizedDescription)
-//                }
-//                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
-//            }
-//            if currentCity == nil, cvm.cities.count > 0 {
-//                currentCity = cvm.cities.first
-//                UserDefaults.standard.setCodableObject(cvm.cities.first, forKey: "city")
-//            }
-//        }
         .onChange(of: searchText) { _, newValue in
             if newValue != "" {
                 cvm.searchCityMKL(text: newValue)

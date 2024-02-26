@@ -98,7 +98,6 @@ struct JunctionView: View {
                                 .tag(TabType.settings)
                         })
                         .tabViewStyle(.page)
-                        .ignoresSafeArea()
                 VStack {
                     Spacer()
                     HStack {

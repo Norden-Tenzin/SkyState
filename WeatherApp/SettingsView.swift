@@ -45,7 +45,6 @@ struct SettingsView: View {
             Spacer()
             Spacer()
         }
-            .padding(.top, 45)
             .padding(.horizontal, 20)
             .fontDesign(.monospaced)
     }
