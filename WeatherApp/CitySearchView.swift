@@ -75,13 +75,22 @@ struct CitySearchView: View {
                                     if city.name != "My Location" {
                                         if let index = cvm.cities.firstIndex(of: city) {
                                             withAnimation {
+                                                // remove city
                                                 cvm.cities.remove(at: index)
+                                                // save the new list
                                                 Task {
                                                     do {
                                                         try cvm.saveCities()
                                                     } catch {
                                                         print(error.localizedDescription)
                                                     }
+                                                }
+                                                // set new currentCity
+                                                if let first = cvm.cities.first {
+                                                    currentCity = first
+                                                    UserDefaults.standard.setCodableObject(first, forKey: "city")
+                                                } else {
+                                                    currentCity = nil
                                                 }
                                             }
                                         }
@@ -181,7 +190,6 @@ struct CitySearchView: View {
         .onChange(of: focusState) { _, newValue in
             if newValue && searchText != "" {
                 // TODO: show again
-                print("HERE")
                 cvm.searchCityMKL(text: searchText)
             } else {
                 // TODO: cancel should remove the dropdown

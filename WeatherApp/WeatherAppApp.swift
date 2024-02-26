@@ -15,7 +15,6 @@ struct WeatherAppApp: App {
     var body: some Scene {
         WindowGroup {
             NavigationStack {
-//                WeatherView()
                 JunctionView()
                     .environment(permissionViewModel)
             }

@@ -115,6 +115,8 @@ struct JunctionView: View {
                             .frame(height: 8)
                     }
                 }
+                .padding(.bottom, 30)
+                .ignoresSafeArea()
             }
         }
         .onAppear {
@@ -158,7 +160,14 @@ struct JunctionView: View {
     }
 }
 
-#Preview() {
+#Preview("NEW") {
+    @State var permissionViewModel: PermissionViewModel = PermissionViewModel()
+
+    return JunctionView()
+        .environment(permissionViewModel)
+}
+
+#Preview("OLD") {
     @State var permissionViewModel: PermissionViewModel = PermissionViewModel()
 
     return JunctionView()

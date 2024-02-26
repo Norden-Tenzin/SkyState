@@ -87,7 +87,7 @@ struct WeatherView: View {
                                 .fontDesign(.monospaced)
                         }
                         Text("Now")
-                            .padding(.bottom, geo.size.height * 0.1)
+                            .padding(.bottom, geo.size.height * 0.05)
                             .fontDesign(.monospaced)
                     }
                     Image(systemName: weather?.currentWeather.symbolName ?? "sun.max")
@@ -112,7 +112,7 @@ struct WeatherView: View {
                             .rotationEffect(Angle(degrees: weather?.currentWeather.wind.direction.value ?? 0))
                         Text(weather?.currentWeather.wind.compassDirection.abbreviation ?? "")
                     }
-                    .padding(.bottom, 40)
+                    .padding(.bottom, geo.size.height * 0.025)
                     .fontDesign(.monospaced)
                     Grid(alignment: .topLeading,
                          verticalSpacing: 5) {
@@ -129,46 +129,24 @@ struct WeatherView: View {
                             .frame(height: 30)
                         }
                     }
-                    .padding(30)
+                         .padding(.horizontal, 20)
                     .fontDesign(.monospaced)
                 }
             }
-            .padding(.top, 45)
+            //.padding(.top, 45)
+            .padding(.top, geo.size.height * 0.03125)
             .scrollIndicators(.hidden)
             .task {
-                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
                 load()
             }
             .onAppear {
-                if currentCity == nil {
-                    // go back to search
-                }
+                currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
             }
         }
     }
 
     func load() {
-        print("IN LOAD")
         Task {
-//            loaded = false
-//            week = []
-//            let lat = vm.currentPlacemark?.location?.coordinate.latitude
-//            let lng = vm.currentPlacemark?.location?.coordinate.longitude
-//
-//            latitude = lat
-//            longitude = lng
-//            let CountryCity = await getCityState(lat: lat ?? 0, long: lng ?? 0)
-//            country = CountryCity["country"] ?? "Country"
-//            city = CountryCity["city"] ?? "City"
-//            weather = await fetchWeather(latitude: lat, longitude: lng)
-//            let dailyForecast = weather?.dailyForecast
-//            for index in 0..<min(dailyForecast?.count ?? 0, 5) {
-//                if let forecast = dailyForecast? [index] {
-//                    week.append(forecast)
-//                }
-//            }
-//            loaded = true
-
             loaded = false
             week = []
             if let cc = currentCity {
@@ -184,8 +162,6 @@ struct WeatherView: View {
                         week.append(forecast)
                     }
                 }
-            } else {
-                print("HERE")
             }
             loaded = true
         }
@@ -227,38 +203,4 @@ func openAppSettings() {
        let url = URL(string: "\(UIApplication.openSettingsURLString)&root=Privacy&path=LOCATION/\(bundleId)") {
         UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
-
-//    if let appSettingsURL = URL(string: UIApplication.openSettingsURLString) {
-//        if UIApplication.shared.canOpenURL(appSettingsURL) {
-//            UIApplication.shared.open(appSettingsURL, options: [:], completionHandler: nil)
-//        }
-//    }
-//
-//    // System settings:
-//    let url = URL(string: UIApplication.openSettingsURLString)!
-//    UIApplication.shared.open(url)
-//
-//    // Notifications settings:
-//    URL(string: Loca)!
-//    UIApplication.shared.open(url)
 }
-
-//
-// #Preview {
-//    @State var viewModel: WeatherViewModel = .init()
-//    //    @AppStorage var userSettings = UserSettings()
-//
-//    @AppStorage("units") var units: Units = .american
-//    @State var loaded: Bool = false
-//    @State var weather: Weather?
-//
-//    @State var latitude: CLLocationDegrees?
-//    @State var longitude: CLLocationDegrees?
-//
-//    @State var country: String?
-//    @State var city: String?
-//
-//    @State var week: [DayWeather] = []
-//
-//    WeatherView(viewModel: viewModel, units: units, loaded: loaded, weather: weather, latitude: latitude, longitude: longitude, country: country, city: city, week: week)
-// }
