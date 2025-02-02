@@ -10,11 +10,6 @@ import SwiftData
 import SwiftUI
 import WeatherKit
 
-public enum Units: String {
-    case american
-    case other
-}
-
 struct WeatherView: View {
     @Environment(\.modelContext) private var modelContext
     @AppStorage("units") var units: Units = .american
