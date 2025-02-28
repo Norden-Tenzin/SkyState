@@ -11,7 +11,6 @@ import SwiftData
 @main
 struct WeatherAppApp: App {
     @State var permissionViewModel: PermissionViewModel = PermissionViewModel()
-
     var body: some Scene {
         WindowGroup {
             NavigationStack {

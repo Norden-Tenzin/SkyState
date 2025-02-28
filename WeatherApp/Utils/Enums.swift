@@ -16,3 +16,9 @@ enum Units: String {
   case american
   case other
 }
+
+enum TabType {
+  case search
+  case weather
+  case settings
+}

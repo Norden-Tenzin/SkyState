@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-enum TabType {
-  case search
-  case weather
-  case settings
-}
-
 struct ContentView: View {
   @Environment(PermissionViewModel.self) var permissionViewModel
   var body: some View {
@@ -52,12 +46,11 @@ struct RequestLocationView: View {
         .multilineTextAlignment(.center)
         .font(.system(size: 20, weight: .semibold))
       Button(action: {
-//        if permissionViewModel.authorizationStatus == .notDetermined {
-//          permissionViewModel.locationManager.cllm.requestPermission()
-//        } else {
-//          locationAccessAlert = true
-//        }
-        //                viewModel.requestPermission()
+        if permissionViewModel.authorizationStatus == .notDetermined {
+          permissionViewModel.requestPermission()
+        } else {
+          locationAccessAlert = true
+        }
       }, label: {
         Label("Allow tracking", systemImage: "location.fill")
       })
@@ -80,81 +73,96 @@ struct RequestLocationView: View {
 struct JunctionView: View {
   @Environment(PermissionViewModel.self) var permissionViewModel
   @State var selection: TabType = .search
-  @State var currentCity: City?
+//  @State var currentCity: City?
   @State var cvm = CityViewModel.instance
+
+  @AppStorage("isTracking") var isTracking: Bool = false
+  @AppStorage("firstLaunch") var firstLaunch = true
+
+  func getData() {
+    if permissionViewModel.authorizationStatus == .authorizedAlways ||
+      permissionViewModel.authorizationStatus == .authorizedWhenInUse {
+      cvm.currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
+      if firstLaunch {
+        print("YES FIRST LAUNCH")
+        isTracking = true
+        firstLaunch = false
+      }
+      if isTracking {
+        let newCity = City(lastLocation: permissionViewModel.lastLocation)
+        cvm.lastCity = newCity
+        if cvm.currentCity == nil {
+          cvm.currentCity = newCity
+        }
+      } else {
+        cvm.lastCity = nil
+        // check if other cities pick first
+        // else nil
+        if cvm.currentCity == cvm.lastCity {
+          if cvm.cities.count > 0 {
+            cvm.currentCity = cvm.cities.first
+          }
+        }
+      }
+    } else {
+      if let index = cvm.cities.firstIndex(where: { city in
+        city.name == "My Location"
+      }) {
+        cvm.cities.remove(at: index)
+      }
+      cvm.currentCity = nil
+    }
+  }
 
   var body: some View {
     NavigationStack {
       ZStack {
-        TabView(selection: $selection,
-                content: {
-                  CitySearchView(cvm: $cvm, currentCity: $currentCity)
-                    .tag(TabType.search)
-                  if !cvm.cities.isEmpty {
-                    WeatherView(currentCity: $currentCity)
-                      .tag(TabType.weather)
-                  }
-                  SettingsView()
-                    .tag(TabType.settings)
-                })
-                .tabViewStyle(.page)
+        TabView(selection: $selection, content: {
+          CitySearchView(cvm: $cvm, isTracking: $isTracking, firstLaunch: $firstLaunch)
+            .tag(TabType.search)
+          if cvm.currentCity != nil {
+            WeatherView(cvm: $cvm)
+              .tag(TabType.weather)
+          }
+          SettingsView()
+            .tag(TabType.settings)
+        })
+        .tabViewStyle(.page(indexDisplayMode: .never))
         VStack {
           Spacer()
           HStack {
-            Circle()
-              .fill(selection == .search ? Color(.systemGray5) : Color(.systemGray2))
-              .frame(height: 8)
-            if !cvm.cities.isEmpty {
-              Circle()
-                .fill(selection == .weather ? Color(.systemGray5) : Color(.systemGray2))
-                .frame(height: 8)
+            Capsule()
+              .fill(selection == TabType.search ? Color(.systemGray5) : Color(.systemGray2))
+              .frame(width: selection == TabType.search ? 20 : 8, height: 8)
+              .transition(.slide)
+              .animation(.easeInOut, value: selection)
+            if cvm.currentCity != nil {
+              Capsule()
+                .fill(selection == TabType.weather ? Color(.systemGray5) : Color(.systemGray2))
+                .frame(width: selection == TabType.weather ? 20 : 8, height: 8)
+                .transition(.slide)
+                .animation(.easeInOut, value: selection)
             }
-            Circle()
-              .fill(selection == .settings ? Color(.systemGray5) : Color(.systemGray2))
-              .frame(height: 8)
+            Capsule()
+              .fill(selection == TabType.settings ? Color(.systemGray5) : Color(.systemGray2))
+              .frame(width: selection == TabType.settings ? 20 : 8, height: 8)
+              .transition(.slide)
+              .animation(.easeInOut, value: selection)
           }
         }
-        .padding(.bottom, 30)
-        .ignoresSafeArea()
+        .padding(.bottom, 32)
       }
+      .ignoresSafeArea()
     }
     .onAppear {
-      if permissionViewModel.authorizationStatus == .authorizedAlways || permissionViewModel.authorizationStatus == .authorizedWhenInUse {
-        let newCity = City()
-        do {
-          try cvm.loadCities()
-        } catch {
-          print(error.localizedDescription)
-        }
-        if !cvm.cities.contains(where: { cc in
-          cc.name == "My Location"
-        }) {
-          cvm.cities = [newCity] + cvm.cities
-        }
-        currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
-        if currentCity != nil {
-          currentCity = newCity
-        }
-      } else {
-        do {
-          try cvm.loadCities()
-        } catch {
-          print(error.localizedDescription)
-        }
-        currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
+      print("ON APPEAR CONTENT VIEW")
+      if !firstLaunch {
+        getData()
       }
-      if currentCity == nil {
-        if cvm.cities.count > 0 {
-          currentCity = cvm.cities.first
-        } else {
-          UserDefaults.standard.setCodableObject(cvm.cities.first, forKey: "city")
-        }
-      }
-      if cvm.cities.isEmpty {
-        selection = .search
-      } else {
-        selection = .weather
-      }
+    }
+    .onChange(of: permissionViewModel.authorizationStatus) { _, newValue in
+      print("Authorization changed: \(newValue.rawValue)")
+      getData()
     }
   }
 }
