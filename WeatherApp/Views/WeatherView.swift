@@ -47,7 +47,6 @@ struct WeatherView: View {
       Spacer()
       VStack(spacing: 0) {
         Image(systemName: weather?.currentWeather.symbolName ?? "cloud.fill")
-          .foregroundStyle(loaded ? Color.black : Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
           .font(.system(size: 70))
         if loaded {
           Text(getTemp(weather?.currentWeather.temperature.value))
@@ -79,12 +78,11 @@ struct WeatherView: View {
             .rotationEffect(Angle(degrees: weather?.currentWeather.wind.direction.value ?? 0))
           Text(weather?.currentWeather.wind.compassDirection.abbreviation ?? "")
         }
-        .foregroundStyle(loaded ? Color.black : Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
         .overlay {
           if loaded {
           } else {
             RoundedRectangle(cornerRadius: 5)
-              .fill(Color(red: 0.839, green: 0.839, blue: 0.839, opacity: 1.000))
+              .fill(Color(.redacted))
           }
         }
       }
@@ -107,7 +105,7 @@ struct WeatherView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 50)
+        .padding(.bottom, 64)
         .fontDesign(.monospaced)
       } else {
         Color.clear
@@ -116,15 +114,9 @@ struct WeatherView: View {
           .padding(.bottom, 50)
       }
     }
-    .safeAreaInset(edge: .top, spacing: 0, content: {
-      Color.white
-        .frame(height: 54)
-        .ignoresSafeArea()
-    })
-    .safeAreaInset(edge: .bottom, spacing: 0, content: {
-      Color.white
-        .frame(height: 32)
-        .ignoresSafeArea()
+    .foregroundStyle(Color(.backgroundInvert))
+    .background(content: {
+      Color(.background)
     })
     .scrollIndicators(.hidden)
     .task {

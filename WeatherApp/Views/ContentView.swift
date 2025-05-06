@@ -84,7 +84,6 @@ struct JunctionView: View {
       permissionViewModel.authorizationStatus == .authorizedWhenInUse {
       cvm.currentCity = UserDefaults.standard.codableObject(dataType: City.self, key: "city")
       if firstLaunch {
-        print("YES FIRST LAUNCH")
         isTracking = true
         firstLaunch = false
       }
@@ -104,6 +103,7 @@ struct JunctionView: View {
           }
         }
       }
+//      TODO: handle re adding currentCity
     } else {
       if let index = cvm.cities.firstIndex(where: { city in
         city.name == "My Location"
@@ -115,45 +115,51 @@ struct JunctionView: View {
   }
 
   var body: some View {
-    NavigationStack {
-      ZStack {
-        TabView(selection: $selection, content: {
-          CitySearchView(cvm: $cvm, isTracking: $isTracking, firstLaunch: $firstLaunch)
-            .tag(TabType.search)
-          if cvm.currentCity != nil {
-            WeatherView(cvm: $cvm)
-              .tag(TabType.weather)
-          }
-          SettingsView()
-            .tag(TabType.settings)
-        })
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        VStack {
-          Spacer()
-          HStack {
-            Capsule()
-              .fill(selection == TabType.search ? Color(.systemGray5) : Color(.systemGray2))
-              .frame(width: selection == TabType.search ? 20 : 8, height: 8)
-              .transition(.slide)
-              .animation(.easeInOut, value: selection)
-            if cvm.currentCity != nil {
-              Capsule()
-                .fill(selection == TabType.weather ? Color(.systemGray5) : Color(.systemGray2))
-                .frame(width: selection == TabType.weather ? 20 : 8, height: 8)
-                .transition(.slide)
-                .animation(.easeInOut, value: selection)
-            }
-            Capsule()
-              .fill(selection == TabType.settings ? Color(.systemGray5) : Color(.systemGray2))
-              .frame(width: selection == TabType.settings ? 20 : 8, height: 8)
-              .transition(.slide)
-              .animation(.easeInOut, value: selection)
-          }
+    ZStack {
+      TabView(selection: $selection, content: {
+        CitySearchView(cvm: $cvm, isTracking: $isTracking, firstLaunch: $firstLaunch)
+          .padding(.top, 50)
+          .tag(TabType.search)
+        if cvm.currentCity != nil {
+          WeatherView(cvm: $cvm)
+            .padding(.top, 50)
+            .tag(TabType.weather)
         }
-        .padding(.bottom, 32)
-      }
+        SettingsView()
+          .padding(.top, 50)
+          .tag(TabType.settings)
+      })
+      .tabViewStyle(.page(indexDisplayMode: .never))
       .ignoresSafeArea()
+      VStack {
+        Spacer()
+        HStack {
+          Capsule()
+            .fill(selection == TabType.search ? Color(.systemGray5) : Color(.systemGray2))
+            .frame(width: selection == TabType.search ? 20 : 8, height: 8)
+            .transition(.slide)
+            .animation(.easeInOut, value: selection)
+          if cvm.currentCity != nil {
+            Capsule()
+              .fill(selection == TabType.weather ? Color(.systemGray5) : Color(.systemGray2))
+              .frame(width: selection == TabType.weather ? 20 : 8, height: 8)
+              .transition(.slide)
+              .animation(.easeInOut, value: selection)
+          }
+          Capsule()
+            .fill(selection == TabType.settings ? Color(.systemGray5) : Color(.systemGray2))
+            .frame(width: selection == TabType.settings ? 20 : 8, height: 8)
+            .transition(.slide)
+            .animation(.easeInOut, value: selection)
+        }
+      }
+      .padding(.bottom, 32)
     }
+    .safeAreaInset(edge: .top, spacing: 0, content: {
+      Color.background
+        .frame(height: 64)
+    })
+    .ignoresSafeArea()
     .onAppear {
       print("ON APPEAR CONTENT VIEW")
       if !firstLaunch {

@@ -18,7 +18,7 @@ struct CityItemView: View {
   var body: some View {
     ZStack {
       RoundedRectangle(cornerRadius: 0)
-        .fill(Color(.systemGray6))
+        .fill(Color(.card))
         .frame(height: 100)
       HStack {
         VStack {

@@ -10,7 +10,7 @@ import CoreLocation
 import WeatherKit
 
 func getCityState(lat: Double, long: Double) async -> [String: String] {
-    print("lat: \(lat) : long: \(long)")
+//    print("lat: \(lat) : long: \(long)")
     let geoCoder = CLGeocoder()
     let location = CLLocation(latitude: lat, longitude: long)
     var res = [String: String] ()
@@ -25,7 +25,6 @@ func getCityState(lat: Double, long: Double) async -> [String: String] {
     } catch {
         print(error)
     }
-    print(res)
     return res
 }
 

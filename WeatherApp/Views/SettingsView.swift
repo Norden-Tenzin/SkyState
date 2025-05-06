@@ -53,19 +53,13 @@ struct SettingsView: View {
         }
         Spacer()
       }
-      Spacer()
+      .padding(.bottom, 64)
     }
-    .padding(.horizontal, 20)
+    .foregroundStyle(Color(.backgroundInvert))
+    .padding(.horizontal, 10)
     .fontDesign(.monospaced)
-    .safeAreaInset(edge: .top, spacing: 0, content: {
-      Color.white
-        .frame(height: 54)
-        .ignoresSafeArea()
+    .background(content: {
+      Color.background
     })
-//    .safeAreaInset(edge: .bottom, spacing: 0, content: {
-//      Color.white
-//        .frame(height: 60)
-//        .ignoresSafeArea()
-//    })
   }
 }

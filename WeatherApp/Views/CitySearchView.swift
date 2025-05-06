@@ -129,7 +129,7 @@ struct CitySearchView: View {
         }
         .padding(.horizontal, 5)
         .background(content: {
-          Color(.systemGray6)
+          Color(.card)
         })
         .contentShape(Rectangle())
         .padding(.horizontal, 10)
@@ -175,6 +175,8 @@ struct CitySearchView: View {
                         }
                         // set new currentCity
                         if let first = cvm.cities.first {
+                          print("FIRST")
+                          print(first)
                           cvm.currentCity = first
                           UserDefaults.standard.setCodableObject(first, forKey: "city")
                         } else {
@@ -193,6 +195,7 @@ struct CitySearchView: View {
         .listStyle(.plain)
         .listRowSpacing(10)
         .padding(.horizontal, 10)
+        .padding(.bottom, 64)
 
         // if searching
         if focusState {
@@ -219,7 +222,7 @@ struct CitySearchView: View {
               }
               .padding()
               .background(content: {
-                Color.white
+                Color.background
               })
               .onTapGesture {
                 searchText = ""
@@ -247,10 +250,9 @@ struct CitySearchView: View {
         }
       }
     }
-    .safeAreaInset(edge: .top, spacing: 0, content: {
-      Color.white
-        .frame(height: 54)
-        .ignoresSafeArea()
+    .foregroundStyle(Color(.backgroundInvert))
+    .background(content: {
+      Color.background
     })
     .alert(isPresented: $showingAlert) {
       Alert(
